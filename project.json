@@ -1,0 +1,15 @@
+{
+    "default": {
+        "builds": {},
+        "core": "3.4.4",
+        "distribution_folder": "./deploy",
+        "format": "1.1.1",
+        "pyodide": "0.19.1",
+        "sources_folder": "./sources",
+        "vi": "3.0.37"
+    },
+    "develop": {
+        "application_name": "viurtest2",
+        "version": "$(year)-$(month)-$(day)-$(user)"
+    }
+}

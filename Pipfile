@@ -1,0 +1,14 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+viur-core = "==3.4.4"
+
+[dev-packages]
+viur-cli = "==1.0.6"
+pycodestyle = "==2.10.0"
+
+[requires]
+python_version = "3.10"
