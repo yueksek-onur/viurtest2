@@ -23,8 +23,9 @@
 #
 # ------------------------------------------------------------------------------
 
+import os, logging
 from viur import core
-from viur.core import conf, email, securityheaders
+from viur.core import current,conf, email, securityheaders
 from viur.core.modules.file import thumbnailer
 
 # ------------------------------------------------------------------------------
@@ -98,10 +99,18 @@ conf["viur.email.transportClass"] = email.EmailTransportSendInBlue
 # Content Security Policy (CSP)
 #
 
+securityheaders.addCspRule("object-src", "none", "enforce")
+securityheaders.addCspRule("style-src", "fonts.googleapis.com", "enforce")
+securityheaders.addCspRule("style-src", "unsafe-inline", "enforce")
+securityheaders.addCspRule("script-src", "apis.google.com", "enforce")
+securityheaders.addCspRule("connect-src", "data:", "enforce")
+
+conf["viur.security.contentSecurityPolicy"] = {}
+
 # GitHub Buttons
-securityheaders.addCspRule("style-src", "unsafe-inline", "enforce")  # yes, GitHub buttons need this...
-securityheaders.addCspRule("script-src", "buttons.github.io", "enforce")
-securityheaders.addCspRule("connect-src", "api.github.com", "enforce")
+#securityheaders.addCspRule("style-src", "unsafe-inline", "enforce")  # yes, GitHub buttons need this...
+#securityheaders.addCspRule("script-src", "buttons.github.io", "enforce")
+#securityheaders.addCspRule("connect-src", "api.github.com", "enforce")
 # Enable this if you want to use the captcha, but not unsafe-inline:
 # securityheaders.addCspRule("script-src", "sha256-TLq3i7CjxmHUoz+BrQ6w5D2+hv35BEkew240zhZ0uvA=", "enforce")
 
@@ -109,7 +118,36 @@ securityheaders.addCspRule("connect-src", "api.github.com", "enforce")
 # Server startup
 #
 
+
+securityheaders.setXFrameOptions("off")
+
+if conf["viur.instance.is_dev_server"]:
+    from viur.datastore.config import conf as db_conf
+
+    db_conf["traceQueries"] = True
+    "Whitelist vueJs Frontend server"
+    conf["viur.security.enableCORP"] = "cross-origin"
+
+
+    def preprocessRequestHandler(path):
+        request = current.request.get()
+        referer = request.request.referer
+        if referer and referer in ["http://localhost:8081/", "http://localhost:8082/"]:
+            referer = request.request.referer[:-1]
+            request.response.headers["Access-Control-Allow-Origin"] = referer
+
+        request.response.headers["Access-Control-Allow-Credentials"] = "true"
+        return path
+
+
+    conf["viur.requestPreprocessor"] = preprocessRequestHandler
+
 import modules
 import render
 
 app = core.setup(modules, render)
+
+
+if conf["viur.instance.is_dev_server"]:
+    logging.debug("==========================SERVER IS UP AND READY=================================")
+    logging.debug(f"==========================USING CORE {core.version.__version__}==================================")
