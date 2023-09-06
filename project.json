@@ -9,7 +9,7 @@
         "vi": "admin-v4.0.4"
     },
     "develop": {
-        "application_name": "rbdev-dev-viur3",
+        "application_name": "viurtest2",
         "version": "$(year)-$(month)-$(day)-$(user)"
     }
 }
